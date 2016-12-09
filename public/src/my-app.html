@@ -20,7 +20,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="my-icons.html">
+
+
+<!--Firebase elements-->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+
+<!--Custom elements-->
+<link rel="import" href="./my-icons.html">
+<link rel="import" href="./my-profile-button.html">
+<link rel="import" href="./my-profile-dialog.html">
 
 <dom-module id="my-app">
   <template>
@@ -70,6 +80,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
+    <firebase-app auth-domain="fir-pizza-party-d6f4b.firebaseapp.com"
+      database-url="https://fir-pizza-party-d6f4b.firebaseio.com"
+      api-key="AIzaSyDXOfZo256sNFihhwaW56RX96ObSkA4Nfg">
+    </firebase-app>
+    <firebase-auth id="auth" 
+      user="{{user}}" 
+      provider="google" 
+      on-error="handleError">
+    </firebase-auth>
+
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer>
@@ -87,15 +107,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div main-title>My App</div>
+            <div main-title>Firebase GDG Chat</div>
+            <my-profile-button
+              user="{{user}}"
+              show-thumbnail="{{!userProfileOpened}}"
+              on-sign-in="_signIn"
+              on-profile-detail="_openProfileDetail">
+            </my-profile-button>
           </app-toolbar>
         </app-header>
 
-        <iron-pages
-            selected="[[page]]"
-            attr-for-selected="name"
-            fallback-selection="view404"
-            role="main">
+        <my-profile-dialog id="userProfile"
+          user="{{user}}"
+          on-close="_closeProfileDetail">
+        </my-profile-dialog>
+
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
           <my-view1 name="view1"></my-view1>
           <my-view2 name="view2"></my-view2>
           <my-view3 name="view3"></my-view3>
@@ -114,23 +141,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           reflectToAttribute: true,
           observer: '_pageChanged'
-        }
+        },
+        user: {
+          type: Object,
+          notify: true,
+          value: null
+        },
+        userProfileOpened: {
+          type: Boolean,
+          readOnly: true,
+          value: false
+        },
       },
-
       observers: [
         '_routePageChanged(routeData.page)'
       ],
-
+      _signIn: function() {
+        this.$.auth.signInWithPopup();
+      },
+      _signOut: function() {
+        this.$.auth.signOut();
+      },
+      _openProfileDetail: function() {
+        this.$.userProfile.open();
+        this._setUserProfileOpened(true);
+      },
+      _closeProfileDetail: function(e) {
+        if (e && e.detail === 'signOut') {
+          this._signOut();
+        }
+        this._setUserProfileOpened(false);
+      },
+      handleError: function(e){
+        console.warn(e);
+      },
       _routePageChanged: function(page) {
         this.page = page || 'view1';
       },
-
       _pageChanged: function(page) {
         // Load page import on demand. Show 404 page if fails
         var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
         this.importHref(resolvedPageUrl, null, this._showPage404, true);
       },
-
       _showPage404: function() {
         this.page = 'view404';
       }
