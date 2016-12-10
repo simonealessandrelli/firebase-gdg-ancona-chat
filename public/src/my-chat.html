@@ -1,0 +1,167 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="./shared-styles.html">
+
+<dom-module id="my-chat">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      iron-list {
+        margin-top: 32px;
+        padding-bottom: 16px;
+      }
+      .item-container {
+        @apply(--layout-horizontal);
+      }
+      .item {
+        @apply(--layout-horizontal);
+        padding: 20px;
+        border-radius: 8px;
+        background-color: white;
+        border: 1px solid #ddd;
+        width: 60%;
+        max-width: 600px;
+        margin: 16px 64px 0px 64px;
+      }
+      .mine {
+        @apply(--layout-start-justified);
+      }
+      .theirs {
+        @apply(--layout-end-justified);
+      }
+      .item:focus {
+        outline: 0;
+        border-color: #333;
+      }
+      .thumbnail {
+        height: 40px;
+        width: 40px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+      .pad {
+        padding: 0 16px;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+      }
+      .primary {
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .secondary {
+        font-size: 14px;
+      }
+      .dim {
+        color: gray;
+      }
+      .time {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+      }
+      .spacer {
+        @apply(--layout-flex);
+      }
+      @media (max-width: 767px) {
+        .item {
+          margin: 16px 16px 0px 16px;
+        }
+      }
+      @media (min-width: 768px) and (max-width: 900px) {
+        .item {
+          margin: 16px 64px 0px 64px;
+        }
+      }
+      @media (min-width: 901px) {
+        .item {
+          margin: 16px 128px 0px 128px;
+        }
+      }
+    </style>
+
+    <iron-list items="[[messages]]" as="message" scroll-target="html">
+      <template>
+        <div class$="item-container {{_owner(message, user)}}">
+          <div class="item" tabindex$="[[tabIndex]]">
+            <iron-image class="thumbnail" sizing="contain" src="[[_image(message)]]"></iron-image>
+            <div class="pad">
+              <div class="primary">[[_username(message)]]</div>
+              <div class="secondary dim">[[message.message]]</div>
+              <div class="secondary time">[[_datetime(message)]]</div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </iron-list>
+    
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-chat',
+      messages: {
+        type: Array,
+        notify: true
+      },
+      _username: function(message) {
+        if (message && message.user && message.user.displayName) {
+          return message.user.displayName;
+        } else {
+          return message.username;
+        }
+      },
+      _image: function(message) {
+        if (message && message.user) {
+          return message.user.photoURL;
+        } else {
+          return '../images/unknown.jpg';
+        }
+      },
+      _datetime: function(message) {
+        if (message) {
+          return this._dateFromMs(message.time);
+        }
+      },
+      _owner: function(message, user) {
+        if (message && message.user && user && message.user.uid === user.uid){
+          return 'mine';
+        } else {
+          return 'theirs';
+        }
+      },
+      /** Get a date from millisecond */
+      _dateFromMs: function(ms) {
+        if (ms && ms !== 0) {
+          var dateToFormat = new Date(ms);
+          var currDate = dateToFormat.getDate();
+          var currMonth = dateToFormat.getMonth() + 1; //Months are zero based
+          var currYear = dateToFormat.getFullYear();
+          var currHours = dateToFormat.getHours();
+          var currMin = dateToFormat.getMinutes();
+          var currSeconds = dateToFormat.getSeconds();
+          return currDate + '-' + currMonth + '-' + currYear + ' ' + 
+            currHours + ':' + currMin + ':' + currSeconds;
+        } else {
+          return '';
+        }
+      },
+    });
+  </script>
+</dom-module>
