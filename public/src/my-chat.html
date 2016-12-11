@@ -107,12 +107,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <firebase-document
-      id="message"
-      app-name="chat"
-      data="{{message}}">
-    </firebase-document>
-
     <div class="messages-list">
       <iron-list items="[[messages]]" as="message" scroll-target="html">
         <template>
@@ -141,9 +135,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         messages: {
           type: Array,
           notify: true
-        },
-        message: {
-          type: Object
         },
         editable: {
           type: Boolean,
@@ -200,19 +191,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         console.log('compute editable ' + value);
         return value;
       },
-      _saveMessage: function(message) {
+      _sendMessage: function(message) {
         if (message && message.message !== '' && message.user){
-          this.$.message.reset();
-          this.set('message', message);
-          this.$.message.save('/chat').then(function () {
-            //notify
-          });
+          this.fire('send-message', message);
         }
       },
       //listen to on-keyup event
       _handleInput: function(e) {
         if (e.keyCode == 13 && e.target.value !== '' && this.user) {
-          this._saveMessage({
+          this._sendMessage({
             message: e.target.value,
             serial: 1,
             time: new Date().getTime(),
