@@ -14,6 +14,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="./shared-styles.html">
 
 <dom-module id="my-chat">
@@ -21,11 +23,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles">
       :host {
         display: block;
-        padding: 10px;
+        height: calc(100vh - 80px);
+        @apply(--layout-vertical);
       }
       iron-list {
         margin-top: 32px;
         padding-bottom: 16px;
+      }
+      .messages-list {
+        @apply(--layout-flex);
+        overflow: auto;
+      }
+      .message-panel {
+        padding: 10px;
+        min-height: 40px;
       }
       .item-container {
         @apply(--layout-horizontal);
@@ -96,29 +107,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <iron-list items="[[messages]]" as="message" scroll-target="html">
-      <template>
-        <div class$="item-container {{_owner(message, user)}}">
-          <div class="item" tabindex$="[[tabIndex]]">
-            <iron-image class="thumbnail" sizing="contain" src="[[_image(message)]]"></iron-image>
-            <div class="pad">
-              <div class="primary">[[_username(message)]]</div>
-              <div class="secondary dim">[[message.message]]</div>
-              <div class="secondary time">[[_datetime(message)]]</div>
+    <firebase-document
+      id="message"
+      app-name="chat"
+      data="{{message}}">
+    </firebase-document>
+
+    <div class="messages-list">
+      <iron-list items="[[messages]]" as="message" scroll-target="html">
+        <template>
+          <div class$="item-container {{_owner(message, user)}}">
+            <div class="item" tabindex$="[[tabIndex]]">
+              <iron-image class="thumbnail" sizing="contain" src="[[_image(message)]]"></iron-image>
+              <div class="pad">
+                <div class="primary">[[_username(message)]]</div>
+                <div class="secondary dim">[[message.message]]</div>
+                <div class="secondary time">[[_datetime(message)]]</div>
+              </div>
             </div>
           </div>
-        </div>
-      </template>
-    </iron-list>
-    
+        </template>
+      </iron-list>
+    </div>
+    <div class="message-panel">
+      <paper-input label="New message" on-keyup="_handleInput" disabled="[[!editable]]"></paper-input>
+    </div>
   </template>
 
   <script>
     Polymer({
       is: 'my-chat',
-      messages: {
-        type: Array,
-        notify: true
+      properties: {
+        messages: {
+          type: Array,
+          notify: true
+        },
+        message: {
+          type: Object
+        },
+        editable: {
+          type: Boolean,
+          computed: '_computeEditable(user)'
+        },
+        user: {
+          type: Object,
+        }
       },
       _username: function(message) {
         if (message && message.user && message.user.displayName) {
@@ -162,6 +195,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return '';
         }
       },
+      _computeEditable: function(user) {
+        var value = Boolean(user && user.uid && user.displayName && user.photoURL);
+        console.log('compute editable ' + value);
+        return value;
+      },
+      _saveMessage: function(message) {
+        if (message && message.message !== '' && message.user){
+          this.$.message.reset();
+          this.set('message', message);
+          this.$.message.save('/chat').then(function () {
+            //notify
+          });
+        }
+      },
+      //listen to on-keyup event
+      _handleInput: function(e) {
+        if (e.keyCode == 13 && e.target.value !== '' && this.user) {
+          this._saveMessage({
+            message: e.target.value,
+            serial: 1,
+            time: new Date().getTime(),
+            user: {
+              uid: this.user.uid,
+              email: this.user.email,
+              displayName: this.user.displayName,
+              photoURL: this.user.photoURL
+            }
+          });
+          e.target.value = '';
+        }
+      }
     });
   </script>
 </dom-module>

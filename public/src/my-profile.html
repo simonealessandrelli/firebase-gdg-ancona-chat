@@ -22,11 +22,11 @@
                 @apply(--my-profile-container);
                 background-color: var(--my-profile-background-color, #fff);
             }
-            sc-thumbnail {
+            my-thumbnail {
                 @apply(--my-profile-thumbnail);
                 margin: 64px 64px 64px 0px;
-                --sc-thumbnail-width: 64px;
-                --sc-thumbnail-height: 64px;
+                --my-thumbnail-width: 64px;
+                --my-thumbnail-height: 64px;
             }
             .main {
                 @apply(--layout-horizontal);
@@ -41,8 +41,8 @@
         </style>
         <paper-material>
             <div class="main">
-                <sc-thumbnail url$="[[user.photoURL]]">
-                </sc-thumbnail>
+                <my-thumbnail url$="[[user.photoURL]]">
+                </my-thumbnail>
                 <div class="info">
                     <h1>[[user.displayName]]</h2>
                     <span>[[user.email]]</span>

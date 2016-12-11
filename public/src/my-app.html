@@ -157,7 +157,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         user: {
           type: Object,
           notify: true,
-          value: null
+          value: null,
+          observer: '_userChanged'
         },
         messages: {
           type: Array,
@@ -198,6 +199,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Load page import on demand. Show 404 page if fails
         var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
         this.importHref(resolvedPageUrl, null, this._showPage404, true);
+      },
+      _userChanged: function(user, old) {
+        console.log(user);
       },
       _showPage404: function() {
         this.page = 'view404';

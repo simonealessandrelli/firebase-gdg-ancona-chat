@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/sc-thumbnail/sc-thumbnail.html">
+<link rel="import" href="./my-thumbnail.html">
 <link rel="import" href="./my-icons.html">
 <link rel="import" href="./shared-styles.html">
 
@@ -15,10 +15,10 @@
       paper-button {
         min-width: 0px;
       }
-      sc-thumbnail {
-        --sc-thumbnail-width: 40px;
-        --sc-thumbnail-height: 40px;
-        --sc-thumbnail-border: 2px linear #fff;
+      my-thumbnail {
+        --my-thumbnail-width: 40px;
+        --my-thumbnail-height: 40px;
+        --my-thumbnail-border: 2px linear #fff;
       }
     </style>
     <!-- Sign-in button -->
@@ -33,9 +33,9 @@
       id="signOut"
       hidden$="[[!_shouldShowThumbnail]]"
       on-tap="_onThumbnailTap">
-      <sc-thumbnail 
+      <my-thumbnail 
         url$="[[user.photoURL]]">
-      </sc-thumbnail>
+      </my-thumbnail>
     </paper-button>
   </template>
   <script>
