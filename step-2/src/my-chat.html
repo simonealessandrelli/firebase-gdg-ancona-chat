@@ -116,9 +116,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     Polymer({
       is: 'my-chat',
-      messages: {
-        type: Array,
-        notify: true
+      properties: {
+        messages: {
+          type: Array,
+          notify: true
+        }
       },
       _username: function(message) {
         if (message && message.user && message.user.displayName) {
