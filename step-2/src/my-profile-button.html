@@ -1,0 +1,83 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="./my-icons.html">
+<link rel="import" href="./shared-styles.html">
+
+
+<dom-module id="my-profile-button">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      paper-button {
+        min-width: 0px;
+      }
+      iron-image.thumbnail {
+        width: 40px;
+        height: 40px;
+      }
+    </style>
+    <!-- Sign-in button -->
+    <paper-icon-button
+      id="signIn"
+      icon="lock" 
+      on-tap="_onSignInTap" 
+      hidden$="[[signed]]">
+    </paper-icon-button>
+    <!-- Profile button -->
+    <paper-button 
+      id="signOut"
+      hidden$="[[!_shouldShowThumbnail]]"
+      on-tap="_onThumbnailTap">
+      <iron-image class="thumbnail" 
+          sizing="contain" 
+          src="[[_image(user)]]">
+      </iron-image>
+    </paper-button>
+  </template>
+  <script>
+    Polymer({
+      is: 'my-profile-button',
+      properties: {
+        user: {
+          type: Object,
+          notify: true
+        },
+        signed: {
+          type: Boolean,
+          computed: '_computeSigned(user)'
+        },
+        showThumbnail: {
+          type: Boolean,
+          value: true
+        },
+        _shouldShowThumbnail: {
+          type: Boolean,
+          computed: '_computeShouldShowThumbnail(signed, showThumbnail)'
+        }
+      },
+      _computeShouldShowThumbnail: function(signed, showThumbnail) {
+        return (signed && showThumbnail);
+      },
+      _computeSigned: function(user) {
+        return Boolean(user);
+      },
+      _onSignInTap: function(e) {
+        this.fire('sign-in');
+      },
+      _onThumbnailTap: function(e) {
+        this.fire('profile-detail');
+      },
+      _image: function(user) { 
+        if (user) { 
+          return user.photoURL; 
+        } else { 
+            return '../images/unknown.jpg'; 
+        } 
+      }
+    });
+  </script>
+</dom-module>

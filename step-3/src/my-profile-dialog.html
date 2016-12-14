@@ -1,0 +1,172 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="my-profile.html">
+
+<dom-module id="my-profile-dialog">
+  <template>
+    <style>
+      :host {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        top: 46px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+      }
+
+      :host([opened]) {
+        display: block;
+      }
+
+      :host(.open) {
+        background-color: var(--my-profile-dialog-background-color, #4285f4);
+      }
+
+      paper-button {
+        color: var(--my-profile-dialog-button-color, #fff);
+      }
+
+      #background {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 512px;
+        width: 256px;
+        height: 256px;
+        background-color: var(--my-profile-dialog-background-color, #4285f4);
+        transform-origin: 128px 128px;
+      }
+
+      my-profile {
+        display: block;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+      }
+
+      :host(.open) my-profile {
+        position: relative;
+        margin: auto;
+        width: calc(100vw - 20px);
+        max-width: 480px;
+      }
+
+      .controls {
+        display: block;
+        position: relative;
+        margin: 10px auto;
+        width: calc(100vw - 20px);
+        max-width: 480px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        justify-content: space-between;
+        transition: opacity 0.3s;
+        opacity: 0;
+      }
+
+      :host(.open) .controls {
+        opacity: 1;
+      }
+    </style>
+    <div id="background"></div>
+    <my-profile id="profile" user="{{user}}"></my-profile>
+    <div class="controls">
+      <paper-button on-tap="_signOut">Sign out</paper-button>
+      <paper-button on-tap="_close">Close</paper-button>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'my-profile-dialog',
+
+      properties: {
+        user: {
+          type: Object,
+          notify: true
+        },
+        opened: {
+          type: Boolean,
+          reflectToAttribute: true,
+          readOnly: true,
+          value: false
+        },
+      },
+
+      open: function() {
+        this._setOpened(true);
+        this.transitionInFrom(this.getBoundingClientRect());
+      },
+
+      _signOut: function() {
+        this.close('signOut');
+      },
+
+      _close: function() {
+        this.close('close');
+      },
+
+      close: function(detail) {
+        this.fire('close', detail, { bubbles: false });
+        this.transitionOut().then(function() {
+          Polymer.dom(this).classList.remove('open');
+          this._setOpened(false);
+        }.bind(this));
+      },
+
+      transitionInFrom: function(rect) {
+        var targetRect = this.getBoundingClientRect();
+        var targetLeft = targetRect.width > 500 ?
+            targetRect.width / 2 - 240 : 10;
+        var targetWidth = targetRect.width > 500 ?
+            '480px' : 'calc(100vw - 20px)'
+        var profileAnimation = this.$.profile.animate([{
+          transform: `translate(${rect.left}px,${rect.top - 46}px)`,
+          width: `${rect.width}px`,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }, {
+          transform: `translate(${targetLeft}px, 0px)`,
+          width: targetWidth
+        }], 500);
+
+        var backgroundAnimation = this.$.background.animate([{
+          transform: `translate(${rect.left + rect.width / 2 - 128}px, ${rect.top - 46 + rect.height / 2 - 128}px) scale(0.1)`,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }, {
+          transform: `scale(${targetRect.width / 256 * 4})`
+        }], 800);
+
+        profileAnimation.addEventListener('finish', function() {
+          Polymer.dom(this).classList.add('open');
+        }.bind(this));
+      },
+
+      transitionOut: function() {
+        var animation = this.animate([{
+          opacity: 1,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }, {
+          opacity: 0
+        }], 300);
+
+        this.$.profile.animate([{
+          transform: 'translateY(0) scale(1)',
+          opacity: 1,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }, {
+          transform: 'translateY(10px) scale(0.9)',
+          opacity: 0
+        }], 500);
+
+        return new Promise(function(resolve) {
+          animation.addEventListener('finish', resolve);
+        }.bind(this));
+      }
+    });
+  </script>
+</dom-module>

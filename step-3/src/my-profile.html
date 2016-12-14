@@ -1,0 +1,73 @@
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="./shared-styles.html">
+
+
+<dom-module id="my-profile">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+                margin: 16px;
+            }
+            paper-material {
+                @apply(--layout-horizontal);
+                @apply(--layout-center-center);
+                @apply(--my-profile-container);
+                background-color: var(--my-profile-background-color, #fff);
+            }
+            iron-image.thumbnail {
+                margin: 64px 64px 64px 0px;
+                width: 64px;
+                height: 64px;
+            }
+            .main {
+                @apply(--layout-horizontal);
+                @apply(--layout-center-center);
+            }
+            .info {
+                @apply(--layout-vertical);
+                @apply(--layout-center);
+                @apply(--my-profile-info);
+            }
+            
+        </style>
+        <paper-material>
+            <div class="main">
+                <iron-image class="thumbnail" 
+                    sizing="contain" 
+                    src="[[_image(user)]]">
+                </iron-image>
+                <div class="info">
+                    <h1>[[user.displayName]]</h2>
+                    <span>[[user.email]]</span>
+                </div>
+            </div>
+        </paper-material>
+    </template>
+    <script>
+        (function() {
+            'use strict';
+            
+            Polymer({
+                is: 'my-profile',
+                properties: {
+                    user: {
+                        type: Object,
+                        notify: true
+                    }
+                },
+                _image: function(user) { 
+                    if (user) { 
+                        return user.photoURL; 
+                    } else { 
+                        return '../images/unknown.jpg'; 
+                    } 
+                }
+            });
+        })();
+    </script>
+</dom-module>
